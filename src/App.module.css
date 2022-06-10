@@ -1,0 +1,11 @@
+.treeNodeInput {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	text-align: center;
+	border: none;
+	background: rgb(0 0 0 / 0%);
+	color: rgb(245 222 179);
+	width: 60px;
+}
