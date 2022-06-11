@@ -1,0 +1,55 @@
+pool:
+  name: Azure Pipelines
+variables:
+  yarn_config_cache: '$(HOME)/.cache/yarn'
+
+steps:
+- task: NodeTool@0
+  displayName: 'Use Node 14.x'
+  inputs:
+    versionSpec: 14.x
+
+- task: Cache@2
+  displayName: 'Cache Yarn Global Temp'
+  inputs:
+    key: 'version1 | yarn | "$(Agent.OS)" | package.json'
+    path: '$(yarn_config_cache)'
+
+- task: Cache@2
+  displayName: 'Cache Node_module'
+  inputs:
+    key: 'version1 | nodeModule | "$(Agent.OS)" | package.json'
+    path: 'node_modules'
+    cacheHitVar: isCacheModule
+
+- script: |
+   echo '
+      FROM macbre/nginx-brotli as final
+      COPY ./nginx_http.conf /etc/nginx/conf.d/
+      COPY ./build/ /var/www/html/
+      CMD sed -i -e 's/HEROKU_PORT/'"$PORT"'/g' /etc/nginx/conf.d/nginx_http.conf && nginx -g '\'daemon off\;\''
+   ' > Dockerfile
+  displayName: 'Create CI DockerFile'
+
+- script: |
+   yarn install
+
+  displayName: 'yarn install'
+  condition: and(succeeded(), eq(variables.isCacheModule, 'false'))
+  env:
+    CYPRESS_INSTALL_BINARY: 0
+
+- script: 'yarn build'
+  displayName: 'yarn build'
+
+- script: 'docker build -t heroku-test .'
+  displayName: 'docker build'
+
+- script: |
+   heroku auth:token
+   heroku container:login
+   heroku container:push web -a $(HEROKU_APP_NAME)
+   heroku container:release web -a $(HEROKU_APP_NAME)
+  displayName: 'deploy image to heroku'
+  env:
+    HEROKU_API_KEY: $(HEROKU_API_KEY)
