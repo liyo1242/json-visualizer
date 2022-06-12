@@ -5,6 +5,7 @@ import { hierarchy, Tree } from '@vx/hierarchy'
 import { LinearGradient } from '@vx/gradient'
 import { pointRadial } from 'd3-shape'
 import getLinkComponent from './component/getLinkComponent'
+import UploadComponent from './component/uploadComponent'
 import classes from './App.module.css'
 
 import { useResize } from './hook/useResize'
@@ -84,7 +85,7 @@ const data: TreeNode = {
   children: jsonTransFormTreeNode(originData),
 }
 
-const defaultMargin = { top: 30, left: 30, right: 30, bottom: 70 }
+const defaultMargin = { top: 80, left: 80, right: 80, bottom: 100 }
 
 export type LinkTypesProps = {
   margin?: { top: number; right: number; bottom: number; left: number }
@@ -129,6 +130,7 @@ export default function ({ margin = defaultMargin }: LinkTypesProps) {
 
   return totalWidth < 10 ? null : (
     <div>
+      <UploadComponent></UploadComponent>
       <svg width={totalWidth} height={totalHeight}>
         <LinearGradient id="links-gradient" from="#fd9b93" to="#fe6e9e" />
         <Group top={margin.top} left={margin.left}>
